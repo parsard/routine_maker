@@ -3,12 +3,12 @@
 part of 'app_database.dart';
 
 // ignore_for_file: type=lint
-class $RoutinesTable extends Routines
-    with TableInfo<$RoutinesTable, RoutineTbl> {
+class $RoutineTableTable extends RoutineTable
+    with TableInfo<$RoutineTableTable, RoutineTbl> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $RoutinesTable(this.attachedDatabase, [this._alias]);
+  $RoutineTableTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
@@ -40,13 +40,24 @@ class $RoutinesTable extends Routines
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, title, days];
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, title, days, createdAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'routines';
+  static const String $name = 'routine_table';
   @override
   VerificationContext validateIntegrity(
     Insertable<RoutineTbl> instance, {
@@ -75,6 +86,14 @@ class $RoutinesTable extends Routines
     } else if (isInserting) {
       context.missing(_daysMeta);
     }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
     return context;
   }
 
@@ -99,12 +118,17 @@ class $RoutinesTable extends Routines
             DriftSqlType.string,
             data['${effectivePrefix}days'],
           )!,
+      createdAt:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.dateTime,
+            data['${effectivePrefix}created_at'],
+          )!,
     );
   }
 
   @override
-  $RoutinesTable createAlias(String alias) {
-    return $RoutinesTable(attachedDatabase, alias);
+  $RoutineTableTable createAlias(String alias) {
+    return $RoutineTableTable(attachedDatabase, alias);
   }
 }
 
@@ -112,21 +136,29 @@ class RoutineTbl extends DataClass implements Insertable<RoutineTbl> {
   final String id;
   final String title;
   final String days;
-  const RoutineTbl({required this.id, required this.title, required this.days});
+  final DateTime createdAt;
+  const RoutineTbl({
+    required this.id,
+    required this.title,
+    required this.days,
+    required this.createdAt,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['title'] = Variable<String>(title);
     map['days'] = Variable<String>(days);
+    map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
 
-  RoutinesCompanion toCompanion(bool nullToAbsent) {
-    return RoutinesCompanion(
+  RoutineTableCompanion toCompanion(bool nullToAbsent) {
+    return RoutineTableCompanion(
       id: Value(id),
       title: Value(title),
       days: Value(days),
+      createdAt: Value(createdAt),
     );
   }
 
@@ -139,6 +171,7 @@ class RoutineTbl extends DataClass implements Insertable<RoutineTbl> {
       id: serializer.fromJson<String>(json['id']),
       title: serializer.fromJson<String>(json['title']),
       days: serializer.fromJson<String>(json['days']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
   @override
@@ -148,19 +181,27 @@ class RoutineTbl extends DataClass implements Insertable<RoutineTbl> {
       'id': serializer.toJson<String>(id),
       'title': serializer.toJson<String>(title),
       'days': serializer.toJson<String>(days),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
 
-  RoutineTbl copyWith({String? id, String? title, String? days}) => RoutineTbl(
+  RoutineTbl copyWith({
+    String? id,
+    String? title,
+    String? days,
+    DateTime? createdAt,
+  }) => RoutineTbl(
     id: id ?? this.id,
     title: title ?? this.title,
     days: days ?? this.days,
+    createdAt: createdAt ?? this.createdAt,
   );
-  RoutineTbl copyWithCompanion(RoutinesCompanion data) {
+  RoutineTbl copyWithCompanion(RoutineTableCompanion data) {
     return RoutineTbl(
       id: data.id.present ? data.id.value : this.id,
       title: data.title.present ? data.title.value : this.title,
       days: data.days.present ? data.days.value : this.days,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
 
@@ -169,65 +210,75 @@ class RoutineTbl extends DataClass implements Insertable<RoutineTbl> {
     return (StringBuffer('RoutineTbl(')
           ..write('id: $id, ')
           ..write('title: $title, ')
-          ..write('days: $days')
+          ..write('days: $days, ')
+          ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, title, days);
+  int get hashCode => Object.hash(id, title, days, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is RoutineTbl &&
           other.id == this.id &&
           other.title == this.title &&
-          other.days == this.days);
+          other.days == this.days &&
+          other.createdAt == this.createdAt);
 }
 
-class RoutinesCompanion extends UpdateCompanion<RoutineTbl> {
+class RoutineTableCompanion extends UpdateCompanion<RoutineTbl> {
   final Value<String> id;
   final Value<String> title;
   final Value<String> days;
+  final Value<DateTime> createdAt;
   final Value<int> rowid;
-  const RoutinesCompanion({
+  const RoutineTableCompanion({
     this.id = const Value.absent(),
     this.title = const Value.absent(),
     this.days = const Value.absent(),
+    this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
-  RoutinesCompanion.insert({
+  RoutineTableCompanion.insert({
     required String id,
     required String title,
     required String days,
+    required DateTime createdAt,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        title = Value(title),
-       days = Value(days);
+       days = Value(days),
+       createdAt = Value(createdAt);
   static Insertable<RoutineTbl> custom({
     Expression<String>? id,
     Expression<String>? title,
     Expression<String>? days,
+    Expression<DateTime>? createdAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (title != null) 'title': title,
       if (days != null) 'days': days,
+      if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
-  RoutinesCompanion copyWith({
+  RoutineTableCompanion copyWith({
     Value<String>? id,
     Value<String>? title,
     Value<String>? days,
+    Value<DateTime>? createdAt,
     Value<int>? rowid,
   }) {
-    return RoutinesCompanion(
+    return RoutineTableCompanion(
       id: id ?? this.id,
       title: title ?? this.title,
       days: days ?? this.days,
+      createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -244,6 +295,9 @@ class RoutinesCompanion extends UpdateCompanion<RoutineTbl> {
     if (days.present) {
       map['days'] = Variable<String>(days.value);
     }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -252,10 +306,11 @@ class RoutinesCompanion extends UpdateCompanion<RoutineTbl> {
 
   @override
   String toString() {
-    return (StringBuffer('RoutinesCompanion(')
+    return (StringBuffer('RoutineTableCompanion(')
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('days: $days, ')
+          ..write('createdAt: $createdAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -265,32 +320,34 @@ class RoutinesCompanion extends UpdateCompanion<RoutineTbl> {
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
-  late final $RoutinesTable routines = $RoutinesTable(this);
+  late final $RoutineTableTable routineTable = $RoutineTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [routines];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [routineTable];
 }
 
-typedef $$RoutinesTableCreateCompanionBuilder =
-    RoutinesCompanion Function({
+typedef $$RoutineTableTableCreateCompanionBuilder =
+    RoutineTableCompanion Function({
       required String id,
       required String title,
       required String days,
+      required DateTime createdAt,
       Value<int> rowid,
     });
-typedef $$RoutinesTableUpdateCompanionBuilder =
-    RoutinesCompanion Function({
+typedef $$RoutineTableTableUpdateCompanionBuilder =
+    RoutineTableCompanion Function({
       Value<String> id,
       Value<String> title,
       Value<String> days,
+      Value<DateTime> createdAt,
       Value<int> rowid,
     });
 
-class $$RoutinesTableFilterComposer
-    extends Composer<_$AppDatabase, $RoutinesTable> {
-  $$RoutinesTableFilterComposer({
+class $$RoutineTableTableFilterComposer
+    extends Composer<_$AppDatabase, $RoutineTableTable> {
+  $$RoutineTableTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -311,11 +368,16 @@ class $$RoutinesTableFilterComposer
     column: $table.days,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
-class $$RoutinesTableOrderingComposer
-    extends Composer<_$AppDatabase, $RoutinesTable> {
-  $$RoutinesTableOrderingComposer({
+class $$RoutineTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $RoutineTableTable> {
+  $$RoutineTableTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -336,11 +398,16 @@ class $$RoutinesTableOrderingComposer
     column: $table.days,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
-class $$RoutinesTableAnnotationComposer
-    extends Composer<_$AppDatabase, $RoutinesTable> {
-  $$RoutinesTableAnnotationComposer({
+class $$RoutineTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RoutineTableTable> {
+  $$RoutineTableTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -355,47 +422,53 @@ class $$RoutinesTableAnnotationComposer
 
   GeneratedColumn<String> get days =>
       $composableBuilder(column: $table.days, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
 }
 
-class $$RoutinesTableTableManager
+class $$RoutineTableTableTableManager
     extends
         RootTableManager<
           _$AppDatabase,
-          $RoutinesTable,
+          $RoutineTableTable,
           RoutineTbl,
-          $$RoutinesTableFilterComposer,
-          $$RoutinesTableOrderingComposer,
-          $$RoutinesTableAnnotationComposer,
-          $$RoutinesTableCreateCompanionBuilder,
-          $$RoutinesTableUpdateCompanionBuilder,
+          $$RoutineTableTableFilterComposer,
+          $$RoutineTableTableOrderingComposer,
+          $$RoutineTableTableAnnotationComposer,
+          $$RoutineTableTableCreateCompanionBuilder,
+          $$RoutineTableTableUpdateCompanionBuilder,
           (
             RoutineTbl,
-            BaseReferences<_$AppDatabase, $RoutinesTable, RoutineTbl>,
+            BaseReferences<_$AppDatabase, $RoutineTableTable, RoutineTbl>,
           ),
           RoutineTbl,
           PrefetchHooks Function()
         > {
-  $$RoutinesTableTableManager(_$AppDatabase db, $RoutinesTable table)
+  $$RoutineTableTableTableManager(_$AppDatabase db, $RoutineTableTable table)
     : super(
         TableManagerState(
           db: db,
           table: table,
           createFilteringComposer:
-              () => $$RoutinesTableFilterComposer($db: db, $table: table),
+              () => $$RoutineTableTableFilterComposer($db: db, $table: table),
           createOrderingComposer:
-              () => $$RoutinesTableOrderingComposer($db: db, $table: table),
+              () => $$RoutineTableTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer:
-              () => $$RoutinesTableAnnotationComposer($db: db, $table: table),
+              () =>
+                  $$RoutineTableTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
                 Value<String> title = const Value.absent(),
                 Value<String> days = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
-              }) => RoutinesCompanion(
+              }) => RoutineTableCompanion(
                 id: id,
                 title: title,
                 days: days,
+                createdAt: createdAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -403,11 +476,13 @@ class $$RoutinesTableTableManager
                 required String id,
                 required String title,
                 required String days,
+                required DateTime createdAt,
                 Value<int> rowid = const Value.absent(),
-              }) => RoutinesCompanion.insert(
+              }) => RoutineTableCompanion.insert(
                 id: id,
                 title: title,
                 days: days,
+                createdAt: createdAt,
                 rowid: rowid,
               ),
           withReferenceMapper:
@@ -425,17 +500,20 @@ class $$RoutinesTableTableManager
       );
 }
 
-typedef $$RoutinesTableProcessedTableManager =
+typedef $$RoutineTableTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $RoutinesTable,
+      $RoutineTableTable,
       RoutineTbl,
-      $$RoutinesTableFilterComposer,
-      $$RoutinesTableOrderingComposer,
-      $$RoutinesTableAnnotationComposer,
-      $$RoutinesTableCreateCompanionBuilder,
-      $$RoutinesTableUpdateCompanionBuilder,
-      (RoutineTbl, BaseReferences<_$AppDatabase, $RoutinesTable, RoutineTbl>),
+      $$RoutineTableTableFilterComposer,
+      $$RoutineTableTableOrderingComposer,
+      $$RoutineTableTableAnnotationComposer,
+      $$RoutineTableTableCreateCompanionBuilder,
+      $$RoutineTableTableUpdateCompanionBuilder,
+      (
+        RoutineTbl,
+        BaseReferences<_$AppDatabase, $RoutineTableTable, RoutineTbl>,
+      ),
       RoutineTbl,
       PrefetchHooks Function()
     >;
@@ -443,6 +521,6 @@ typedef $$RoutinesTableProcessedTableManager =
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
-  $$RoutinesTableTableManager get routines =>
-      $$RoutinesTableTableManager(_db, _db.routines);
+  $$RoutineTableTableTableManager get routineTable =>
+      $$RoutineTableTableTableManager(_db, _db.routineTable);
 }

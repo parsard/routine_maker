@@ -4,18 +4,13 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'dart:io';
 
+import 'package:routine_maker/features/routine/data/models/routine_table.dart';
+
 part 'app_database.g.dart';
 
-@DataClassName('RoutineTbl')
-class Routines extends Table {
-  TextColumn get id => text()();
-  TextColumn get title => text().withLength(min: 1, max: 100)();
-  TextColumn get days => text()();
-  @override
-  Set<Column> get primaryKey => {id};
-}
 
-@DriftDatabase(tables: [Routines])
+
+@DriftDatabase(tables: [RoutineTable])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
