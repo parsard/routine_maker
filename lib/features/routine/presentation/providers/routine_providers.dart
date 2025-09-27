@@ -1,0 +1,94 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:routine_maker/core/di/database_provider.dart';
+import 'package:routine_maker/core/usecase.dart';
+import 'package:routine_maker/features/routine/data/datasources/routine_local_data_source.dart';
+import 'package:routine_maker/features/routine/data/repositories/routine_repository_impl.dart';
+import 'package:routine_maker/features/routine/domain/entities/routine_entity.dart';
+import 'package:routine_maker/features/routine/domain/repositories/routine_repository.dart';
+import 'package:routine_maker/features/routine/domain/usecases/add_routine_usecase.dart';
+import 'package:routine_maker/features/routine/domain/usecases/delete_routine_usecase.dart';
+import 'package:routine_maker/features/routine/domain/usecases/get_all_routine_usecase.dart';
+import 'package:routine_maker/features/routine/presentation/state/routine_state.dart';
+
+
+final routineLocalDataSourceProvider = Provider<RoutineLocalDataSource>((ref) {
+  return RoutineLocalDataSourceImpl(database: ref.watch(appDatabaseProvider));
+});
+
+final routineRepositoryProvider = Provider<RoutineRepository>((ref) {
+  final localDataSource = ref.watch(routineLocalDataSourceProvider);
+  return RoutineRepositoryImpl(localDataSource: localDataSource);
+});
+final getAllRoutinesProvider = Provider<GetAllRoutinesUseCase>((ref) {
+
+  final repository = ref.watch(routineRepositoryProvider);
+  return GetAllRoutinesUseCase(repository);
+});
+
+final addRoutineProvider = Provider<AddRoutineUseCase>((ref) {
+
+  final repository = ref.watch(routineRepositoryProvider);
+  return AddRoutineUseCase(repository);
+});
+
+final deleteRoutineProvider = Provider<DeleteRoutineUseCase>((ref) {
+  
+  final repository =ref.watch(routineRepositoryProvider);
+  return DeleteRoutineUseCase(repository: repository);
+});
+
+
+
+class RoutineNotifier extends StateNotifier<RoutineState> {
+  RoutineNotifier(this._getAllRoutines, this._addRoutine, this._deleteRoutine)
+      : super(const RoutineState()) {
+    fetchAllRoutines();
+  }
+
+  final GetAllRoutinesUseCase _getAllRoutines;
+  final AddRoutineUseCase _addRoutine;
+  final DeleteRoutineUseCase _deleteRoutine;
+
+  Future<void> fetchAllRoutines() async {
+    state = state.copyWith(status: RoutineStatus.loading);
+    final result = await _getAllRoutines(NoParams());
+    result.fold(
+      (failure) {
+        state = state.copyWith(
+            status: RoutineStatus.failure, errorMessage: failure.message);
+      },
+      (routines) {
+        state = state.copyWith(status: RoutineStatus.success, routines: routines);
+      },
+    );
+  }
+
+  Future<void> addRoutine(RoutineEntity routine) async {
+    final result =await _addRoutine(routine);
+    result.fold(
+      (failure) {
+      },
+      (success) {
+        fetchAllRoutines();
+      },
+    );
+  }
+
+  Future<void> deleteRoutine(String id) async {
+    final result = await _deleteRoutine(DeleteRoutineParams(id: id));
+     result.fold(
+      (failure) {
+      },
+      (success) {
+        fetchAllRoutines();
+      },
+    );
+  }
+}
+
+final routineNotifierProvider = StateNotifierProvider<RoutineNotifier, RoutineState>((ref) {
+  final getAllRoutines = ref.watch(getAllRoutinesProvider);
+  final addRoutine = ref.watch(addRoutineProvider);
+  final deleteRoutine = ref.watch(deleteRoutineProvider);
+  return RoutineNotifier(getAllRoutines, addRoutine, deleteRoutine);
+});
