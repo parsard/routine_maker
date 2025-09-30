@@ -49,6 +49,9 @@ dependencies:
   flutter_slidable: ^4.0.1
   shamsi_date: ^1.1.1
   flutter_screenutil: ^5.9.3
+  google_nav_bar: ^5.0.7
+  
+
 
 dev_dependencies:
   flutter_test:
