@@ -13,7 +13,6 @@ class RoutineListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // به وضعیت روتین‌ها گوش می‌دهیم
     final state = ref.watch(routineNotifierProvider);
 
     return Scaffold(
