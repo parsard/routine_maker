@@ -1,6 +1,7 @@
 // lib/features/routine/presentation/widgets/weekly_calendar.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:routine_maker/features/routine/presentation/notifiers/calender_notifier.dart';
 
 class WeeklyCalendar extends ConsumerWidget {
@@ -14,78 +15,75 @@ class WeeklyCalendar extends ConsumerWidget {
     final weekDays = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
     final weekDates = calendarNotifier.getWeekDays();
     
-    final canGoBack = calendarNotifier.canNavigateBack();
-    final canGoNext = calendarNotifier.canNavigateNext();
+    final bool isCurrentWeek = calendarNotifier.isDisplayingCurrentWeek();
+
+    
+    final String buttonText = isCurrentWeek ? 'هفته قبل' : 'هفته بعد';
+    
+   
+    final VoidCallback buttonAction = isCurrentWeek 
+        ? calendarNotifier.goToPreviousWeek 
+        : calendarNotifier.goToCurrentWeek;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          IconButton(
-            icon: Icon(
-              Icons.arrow_back_ios,
-              color: canGoNext ? null : Colors.grey.withOpacity(0.3),
+          TextButton(
+            
+            onPressed: buttonAction,
+            child: Text(buttonText),
+            style: TextButton.styleFrom(
+              
+              backgroundColor: Colors.green,
+              foregroundColor: Theme.of(context).primaryColor,
+              textStyle: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            onPressed: canGoNext ? calendarNotifier.nextWeek : null,
           ),
-          ...List.generate(7, (index) {
-            final date = weekDates[index];
-            
-            
-            final bool today = calendarNotifier.isToday(date);
-            
-            final bool isSelected = false; 
-            final Color? backgroundColor;
-            final Color textColor;
-            final FontWeight fontWeight;
+          SizedBox(width: 16.w),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: List.generate(7, (index) {
+              final date = weekDates[index];
+              final bool isToday = calendarNotifier.isToday(date);
+              
+              final Color backgroundColor = isToday 
+                  ? Theme.of(context).primaryColor 
+                  : Colors.transparent;
+              final Color textColor = isToday ? Colors.white : Colors.black;
 
-            if (today) {
-              backgroundColor = Theme.of(context).primaryColor; 
-              textColor = Colors.white;
-              fontWeight = FontWeight.bold; 
-            } else {
-              backgroundColor = Colors.transparent;
-              textColor = Colors.black;
-              fontWeight = FontWeight.normal;
-            }
-
-            return Column(
-              children: [
-                Text(
-                  weekDays[index],
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: backgroundColor,
-                    border: today && !isSelected 
-                        ? Border.all(color: Theme.of(context).primaryColor, width: 1.5) 
-                        : null,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    '${date.day}',
-                    style: TextStyle(
-                      color: textColor,
-                      fontWeight: fontWeight,
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                child: Column(
+                  children: [
+                    Text(
+                      weekDays[index],
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 8),
+                    Container(
+                      width: 36,
+                      height: 36,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: backgroundColor,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        '${date.day}',
+                        style: TextStyle(
+                          color: textColor,
+                          fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            );
-          }),
-          IconButton(
-            icon: Icon(
-              Icons.arrow_forward_ios,
-              color: canGoBack ? null : Colors.grey.withOpacity(0.3),
-            ),
-            onPressed: canGoBack ? calendarNotifier.previousWeek : null,
+              );
+            }),
           ),
         ],
       ),
