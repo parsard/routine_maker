@@ -1,3 +1,4 @@
+// lib/features/routine/presentation/widgets/alarm_setter.dart
 import 'package:flutter/material.dart';
 
 class AlarmSetter extends StatefulWidget {
@@ -17,6 +18,12 @@ class _AlarmSetterState extends State<AlarmSetter> {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: _selectedTime ?? TimeOfDay.now(),
+      builder: (context, child) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: child ?? Container(),
+        );
+      },
     );
     if (picked != null && picked != _selectedTime) {
       setState(() {
@@ -29,40 +36,29 @@ class _AlarmSetterState extends State<AlarmSetter> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-         const Text(
+        const Text(
           'یادآور',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           textAlign: TextAlign.right,
         ),
         const SizedBox(height: 8),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          // !<-- تغییر در Padding و Decoration -->!
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4), // کاهش پدینگ عمودی
           decoration: BoxDecoration(
-            color: Colors.grey[200],
+            // پس زمینه حذف و حاشیه اضافه شد
+            border: Border.all(color: Colors.grey.shade400), 
             borderRadius: BorderRadius.circular(10),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              TextButton(
-                onPressed: _isAlarmEnabled ? _pickTime : null,
-                child: const Text('تغییر زمان'),
-              ),
-              Text(
-                _isAlarmEnabled && _selectedTime != null
-                    ? _selectedTime!.format(context)
-                    : '--:--',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: _isAlarmEnabled ? Colors.black : Colors.grey,
-                ),
-              ),
+              // !<-- ترتیب متن و چک‌باکس مطابق تصویر اصلاح شد -->!
               Row(
                 children: [
-                  const Text('فعال کردن یادآور'),
+                  const Text('یادآور'),
                   Checkbox(
                     value: _isAlarmEnabled,
                     onChanged: (bool? value) {
@@ -72,10 +68,25 @@ class _AlarmSetterState extends State<AlarmSetter> {
                           _selectedTime = TimeOfDay.now();
                         }
                       });
-                       widget.onAlarmChanged(_isAlarmEnabled, _selectedTime);
+                      widget.onAlarmChanged(_isAlarmEnabled, _selectedTime);
                     },
                   ),
                 ],
+              ),
+              Text(
+                _isAlarmEnabled && _selectedTime != null
+                    ? _selectedTime!.format(context)
+                    : '--:--',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: _isAlarmEnabled ? Colors.black : Colors.grey,
+                  fontFamily: 'Vazirmatn',
+                ),
+              ),
+              TextButton(
+                onPressed: _isAlarmEnabled ? _pickTime : null,
+                child: const Text('تغییر زمان'),
               ),
             ],
           ),

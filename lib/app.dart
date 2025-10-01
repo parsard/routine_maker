@@ -26,7 +26,7 @@ class App extends StatelessWidget {
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8),
             child: GNav(
               rippleColor: Colors.grey[300]!,
               hoverColor: Colors.grey[100]!,
@@ -40,15 +40,18 @@ class App extends StatelessWidget {
               tabs: const [
                 GButton(
                   icon: Icons.bar_chart_outlined,
-                  text: 'آمار',
+                  iconSize: 28,
+                  // text: 'آمار',
                 ),
                 GButton(
                   icon: Icons.home_outlined,
-                  text: 'خانه',
+                  iconSize: 28,
+                  // text: 'خانه',
                 ),
                 GButton(
                   icon: Icons.note_alt_outlined,
-                  text: 'یادداشت',
+                  iconSize: 28,
+                  // text: 'یادداشت',
                 ),
               ],
               selectedIndex: navigationShell.currentIndex,
