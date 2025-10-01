@@ -8,6 +8,11 @@ import 'package:routine_maker/features/routine/presentation/widgets/app_header.d
 import 'package:routine_maker/features/routine/presentation/widgets/routine_list_item.dart';
 import 'package:routine_maker/features/routine/presentation/widgets/weekly_calender.dart';
 
+// lib/features/routine/presentation/screens/routine_list_screen.dart
+
+// ... ایمپورت‌های قبلی ...
+import 'package:routine_maker/features/routine/presentation/widgets/add_routine_bottom_sheet.dart'; // ایمپورت جدید
+
 class RoutineListScreen extends ConsumerWidget {
   const RoutineListScreen({super.key});
 
@@ -19,16 +24,14 @@ class RoutineListScreen extends ConsumerWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // 1. هدر سفارشی
             AppHeader(
               onAddPressed: () {
-                _showAddRoutineDialog(context, ref);
+                // تابع دیالوگ را با تابع BottomSheet جایگزین می‌کنیم
+                _showAddRoutineBottomSheet(context);
               },
             ),
-            // 2. تقویم هفتگی
             const WeeklyCalendar(),
             const SizedBox(height: 10),
-            // 3. لیست روتین‌ها
             Expanded(
               child: _buildBody(context, ref, state),
             ),
@@ -38,8 +41,9 @@ class RoutineListScreen extends ConsumerWidget {
     );
   }
 
-  // متد برای نمایش بدنه بر اساس وضعیت
   Widget _buildBody(BuildContext context, WidgetRef ref, RoutineState state) {
+    // ... این تابع بدون تغییر باقی می‌ماند ...
+    // فقط در RoutineListItem باید رنگ را هم پاس بدهید
     switch (state.status) {
       case RoutineStatus.loading:
         return const Center(child: CircularProgressIndicator());
@@ -55,11 +59,12 @@ class RoutineListScreen extends ConsumerWidget {
             final routine = state.routines[index];
             return RoutineListItem(
               title: routine.title,
+              // color: routine.color,
               onDelete: () {
                 ref.read(routineNotifierProvider.notifier).deleteRoutine(routine.id);
               },
               onEdit: () {
-                // TODO: منطق ویرایش را اینجا پیاده‌سازی کنید (مثلا نمایش یک دیالوگ مشابه افزودن)
+                // TODO: منطق ویرایش
               },
             );
           },
@@ -69,43 +74,26 @@ class RoutineListScreen extends ConsumerWidget {
     }
   }
 
-  // دیالوگ برای افزودن روتین جدید
-  void _showAddRoutineDialog(BuildContext context, WidgetRef ref) {
-    final TextEditingController controller = TextEditingController();
-    showDialog(
+  // تابع جدید برای نمایش BottomSheet
+  void _showAddRoutineBottomSheet(BuildContext context) {
+    showModalBottomSheet(
       context: context,
+      // این دو خط باعث می‌شود BottomSheet بالای کیبورد قرار بگیرد
+      isScrollControlled: true,
+      // شکل گوشه‌های بالا را گرد می‌کند
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (context) {
-        return AlertDialog(
-          title: const Text('افزودن روتین جدید'),
-          content: TextField(
-            controller: controller,
-            decoration: const InputDecoration(hintText: 'عنوان روتین'),
-            textAlign: TextAlign.right, // برای ورودی فارسی
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('لغو'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final title = controller.text;
-                if (title.isNotEmpty) {
-                  final newRoutine = RoutineEntity(
-                    id: DateTime.now().millisecondsSinceEpoch.toString(),
-                    title: title,
-                    days: List.filled(7, ''),
-                    createdAt: DateTime.now(),
-                  );
-                  ref.read(routineNotifierProvider.notifier).addRoutine(newRoutine);
-                  Navigator.of(context).pop();
-                }
-              },
-              child: const Text('افزودن'),
-            ),
-          ],
-        );
+        return const AddRoutineBottomSheet();
       },
     );
   }
+
+  // این تابع دیگر لازم نیست، می‌توانید آن را حذف کنید.
+  /*
+  void _showAddRoutineDialog(BuildContext context, WidgetRef ref) {
+    // ...
+  }
+  */
 }

@@ -20,7 +20,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           return App(navigationShell: navigationShell);
         },
         branches: [
-          // Branch برای تب اول: Home
           StatefulShellBranch(
             routes: [
               GoRoute(
@@ -29,7 +28,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          // Branch برای تب دوم: Chart
           StatefulShellBranch(
             routes: [
               GoRoute(
@@ -38,7 +36,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          // Branch برای تب سوم: Note
           StatefulShellBranch(
             routes: [
               GoRoute(

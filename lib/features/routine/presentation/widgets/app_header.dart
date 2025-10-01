@@ -1,4 +1,3 @@
-// lib/features/routine/presentation/widgets/app_header.dart
 import 'package:flutter/material.dart';
 
 class AppHeader extends StatelessWidget {
@@ -16,16 +15,7 @@ class AppHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // دکمه افزودن در سمت چپ (در RTL)
-          IconButton(
-            icon: const Icon(Icons.add_circle_outline, size: 30),
-            onPressed: onAddPressed,
-            color: Theme.of(context).primaryColor,
-          ),
-          // لوگو و نام برنامه در سمت راست (در RTL)
-          const Row(
-            children: [
-              Text(
+           Text(
                 'روتین‌ساز',
                 style: TextStyle(
                   fontSize: 24,
@@ -33,11 +23,15 @@ class AppHeader extends StatelessWidget {
                 ),
               ),
               SizedBox(width: 8),
-              Icon(
-                Icons.checklist_rtl_rounded,
-                color: Colors.deepPurple,
-                size: 32,
-              ),
+              
+          
+           Row(
+            children: [
+              IconButton(
+            icon:  Icon(Icons.add_circle_outline, size: 30),
+            onPressed: onAddPressed,
+            color: Theme.of(context).primaryColor,
+          ),
             ],
           ),
         ],
