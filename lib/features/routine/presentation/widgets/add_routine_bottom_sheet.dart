@@ -5,7 +5,7 @@ import 'package:routine_maker/features/routine/domain/entities/routine_entity.da
 import 'package:routine_maker/features/routine/presentation/providers/routine_providers.dart';
 import 'package:routine_maker/features/routine/presentation/widgets/alarm_selector.dart';
 import 'package:routine_maker/features/routine/presentation/widgets/color_selector.dart';
-import 'package:routine_maker/features/routine/presentation/widgets/day_selector.dart';
+import 'package:routine_maker/features/routine/presentation/widgets/frequency_selector.dart';
 
 class AddRoutineBottomSheet extends ConsumerStatefulWidget {
   const AddRoutineBottomSheet({super.key});
@@ -21,6 +21,7 @@ class _AddRoutineBottomSheetState extends ConsumerState<AddRoutineBottomSheet> {
   bool _isAlarmEnabled = false;
   TimeOfDay? _alarmTime;
   Color _selectedColor = Colors.blue; 
+  int _targetRepetitions = 3;
 
   void _saveRoutine() {
     final title = _titleController.text;
@@ -35,7 +36,6 @@ class _AddRoutineBottomSheetState extends ConsumerState<AddRoutineBottomSheet> {
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: title,
       
-      days: _convertSelectedDaysToStrings(_selectedDays),
       createdAt: DateTime.now(),
       alarmTime: _isAlarmEnabled ? _alarmTime : null,
       color: _selectedColor,
@@ -46,7 +46,15 @@ class _AddRoutineBottomSheetState extends ConsumerState<AddRoutineBottomSheet> {
   }
 
   List<String> _convertSelectedDaysToStrings(List<bool> selected) {
-    final List<String> dayNames = ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+    final List<String> dayNames = [
+      'شنبه',    // 0
+      'یکشنبه',  // 1
+      'دوشنبه',  // 2
+      'سه‌شنبه', // 3
+      'چهارشنبه',// 4
+      'پنج‌شنبه',// 5
+      'جمعه'     // 6
+    ];
     List<String> result = [];
     for(int i = 0; i < selected.length; i++) {
       if(selected[i]) {
@@ -97,12 +105,14 @@ class _AddRoutineBottomSheetState extends ConsumerState<AddRoutineBottomSheet> {
             ),
             const SizedBox(height: 24),
 
-            // Day Selector
-            DaySelector(
-              onSelectionChanged: (days) {
-                _selectedDays = days;
-              },
-            ),
+            FrequencySelector(
+  initialFrequency: 1,
+  onFrequencyChanged: (frequency) {
+    setState(() {
+      _targetRepetitions = frequency;
+    });
+  },
+),
             const SizedBox(height: 24),
 
             // Alarm Setter
@@ -119,7 +129,9 @@ class _AddRoutineBottomSheetState extends ConsumerState<AddRoutineBottomSheet> {
             // Color Selector
             ColorSelector(
               onColorSelected: (color) {
-                _selectedColor = color;
+                setState(() {
+                  _selectedColor = color;
+                });
               },
             ),
             const SizedBox(height: 20),
@@ -127,5 +139,10 @@ class _AddRoutineBottomSheetState extends ConsumerState<AddRoutineBottomSheet> {
         ),
       ),
     );
+  }
+  @override
+  void dispose() {
+    _titleController.dispose();
+    super.dispose();
   }
 }

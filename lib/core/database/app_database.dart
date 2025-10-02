@@ -13,9 +13,8 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3; // ⬅️ افزایش version
+  int get schemaVersion => 5; 
 
-// lib/core/database/app_database.dart
 @override
 MigrationStrategy get migration {
   return MigrationStrategy(
@@ -23,7 +22,6 @@ MigrationStrategy get migration {
       await m.createAll();
     },
     onUpgrade: (Migrator m, int from, int to) async {
-      // ⚠️ فقط برای Development - تمام دیتا پاک میشه!
       await m.deleteTable('routine_table');
       await m.createAll();
     },

@@ -1,13 +1,15 @@
-// lib/features/routine/presentation/screens/routine_list_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:routine_maker/features/routine/domain/entities/routine_entity.dart';
 import 'package:routine_maker/features/routine/presentation/notifiers/calender_notifier.dart';
-import 'package:routine_maker/features/routine/presentation/providers/routine_providers.dart';
+import 'package:routine_maker/features/routine/presentation/providers/routine_providers.dart'; 
 import 'package:routine_maker/features/routine/presentation/state/routine_state.dart';
 import 'package:routine_maker/features/routine/presentation/widgets/app_header.dart';
 import 'package:routine_maker/features/routine/presentation/widgets/routine_list_item.dart';
 import 'package:routine_maker/features/routine/presentation/widgets/weekly_calender.dart';
-import 'package:routine_maker/features/routine/presentation/widgets/add_routine_bottom_sheet.dart';
+
+
+import 'package:routine_maker/features/routine/presentation/widgets/add_routine_bottom_sheet.dart'; 
 
 class RoutineListScreen extends ConsumerWidget {
   const RoutineListScreen({super.key});
@@ -44,64 +46,28 @@ class RoutineListScreen extends ConsumerWidget {
       case RoutineStatus.failure:
         return Center(child: Text('خطا: ${state.errorMessage}'));
       case RoutineStatus.success:
-        final calendarNotifier = ref.read(calendarNotifierProvider.notifier);
-        final selectedDayName = calendarNotifier.getSelectedDayName();
-        final selectedDate = calendarNotifier.getSelectedDate();
-
-        final filteredRoutines = state.routines.where((routine) {
-          return routine.days.contains(selectedDayName);
-        }).toList();
-
-        if (filteredRoutines.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.event_busy,
-                  size: 64,
-                  color: Colors.grey[400],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'هیچ روتینی برای $selectedDayName',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${selectedDate.day} ${_getMonthName(selectedDate.month)} ${selectedDate.year}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-          );
+        if (state.routines.isEmpty) {
+          return const Center(child: Text('هنوز روتینی اضافه نکرده‌اید.'));
         }
-
         return ListView.builder(
-          itemCount: filteredRoutines.length,
-          itemBuilder: (context, index) {
-            final routine = filteredRoutines[index];
-            return RoutineListItem(
-              title: routine.title,
-              // color: routine.color,
-              onDelete: () {
-                ref
-                    .read(routineNotifierProvider.notifier)
-                    .deleteRoutine(routine.id);
-              },
-              onEdit: () {
-                // TODO: منطق ویرایش
-              },
-            );
-          },
-        );
+  itemCount: state.routines.length,
+  itemBuilder: (context, index) {
+    final routine = state.routines[index];
+    return RoutineListItem(
+      title: routine.title,
+      color: routine.color,  
+      targetRepetitions: routine.targetRepetitionsPerWeek,  
+      completedRepetitions: routine.completedRepetitionsThisWeek,  
+      onDelete: () {
+        ref.read(routineNotifierProvider.notifier).deleteRoutine(routine.id);
+      },
+      onEdit: () {
+        // TODO: منطق ویرایش
+      },
+    );
+  },
+);
+
       default:
         return const SizedBox.shrink();
     }
@@ -120,22 +86,5 @@ class RoutineListScreen extends ConsumerWidget {
     );
   }
 
-  // ⬅️ تابع کمکی برای نام ماه
-  String _getMonthName(int month) {
-    const months = [
-      'فروردین',
-      'اردیبهشت',
-      'خرداد',
-      'تیر',
-      'مرداد',
-      'شهریور',
-      'مهر',
-      'آبان',
-      'آذر',
-      'دی',
-      'بهمن',
-      'اسفند'
-    ];
-    return months[month - 1];
-  }
+ 
 }
