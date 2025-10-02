@@ -1,3 +1,4 @@
+// lib/features/routine/presentation/widgets/color_selector.dart
 import 'package:flutter/material.dart';
 
 class ColorSelector extends StatefulWidget {
@@ -37,67 +38,70 @@ class _ColorSelectorState extends State<ColorSelector> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            const Text(
-              ' رنگ',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              textAlign: TextAlign.right,
-            ),
-          ],
+        const Text(
+          'رنگ',
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+          textAlign: TextAlign.right,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 16),
         
-        LayoutBuilder(builder: (context, constraints) {
-          
-          final int columns = constraints.maxWidth >= 600 ? 6 : 5;
-          const double spacing = 12.0;
-
-          final double itemWidth = (constraints.maxWidth - (columns - 1) * spacing) / columns;
-          final double innerRadius = (itemWidth * 0.35).clamp(14.0, 20.0);
-          final double outerRadius = innerRadius + 4.0;
-
-          return SizedBox(
-            height: outerRadius * 2 * ((_colors.length / columns).ceil()) + spacing * ((_colors.length / columns).ceil() - 1),
-            child: Directionality(
-              textDirection: TextDirection.rtl,
-              child: SingleChildScrollView(
-                child: Wrap(
-                  spacing: spacing,
-                  runSpacing: spacing,
-                  children: List.generate(_colors.length, (index) {
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedIndex = index;
-                        });
-                        widget.onColorSelected(_colors[index]);
-                      },
-                      child: SizedBox(
-                        width: itemWidth,
-                        child: Center(
-                          child: CircleAvatar(
-                            radius: outerRadius,
-                            backgroundColor: _selectedIndex == index
-                                ? Theme.of(context).primaryColor.withOpacity(0.7)
-                                : Colors.transparent,
-                            child: CircleAvatar(
-                              radius: innerRadius,
-                              backgroundColor: _colors[index],
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-              ),
+        // Color Grid
+        SizedBox(
+          height: 180,
+          child: GridView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 10,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+              childAspectRatio: 1,
             ),
-          );
-        }),
+            itemCount: _colors.length,
+            itemBuilder: (context, index) {
+              final isSelected = _selectedIndex == index;
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedIndex = index;
+                  });
+                  widget.onColorSelected(_colors[index]);
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: _colors[index],
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: isSelected
+                          ? Colors.black
+                          : Colors.transparent,
+                      width: 2,
+                    ),
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: _colors[index].withOpacity(0.4),
+                              blurRadius: 8,
+                              spreadRadius: 2,
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: isSelected
+                      ? Icon(
+                          Icons.check,
+                          color: _colors[index].computeLuminance() > 0.5
+                              ? Colors.black
+                              : Colors.white,
+                          size: 16,
+                        )
+                      : null,
+                ),
+              );
+            },
+          ),
+        ),
       ],
     );
   }

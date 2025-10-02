@@ -38,57 +38,80 @@ class _AlarmSetterState extends State<AlarmSetter> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          'یادآور',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          textAlign: TextAlign.right,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'یادآور',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+              textAlign: TextAlign.right,
+            ),
+            Switch(
+              value: _isAlarmEnabled,
+              onChanged: (bool value) {
+                setState(() {
+                  _isAlarmEnabled = value;
+                  if (_isAlarmEnabled && _selectedTime == null) {
+                    _selectedTime = TimeOfDay.now();
+                  }
+                });
+                widget.onAlarmChanged(_isAlarmEnabled, _selectedTime);
+              },
+            ),
+          ],
         ),
-        const SizedBox(height: 8),
-        Container(
-          // !<-- تغییر در Padding و Decoration -->!
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4), // کاهش پدینگ عمودی
-          decoration: BoxDecoration(
-            // پس زمینه حذف و حاشیه اضافه شد
-            border: Border.all(color: Colors.grey.shade400), 
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // !<-- ترتیب متن و چک‌باکس مطابق تصویر اصلاح شد -->!
-              Row(
-                children: [
-                  const Text('یادآور'),
-                  Checkbox(
-                    value: _isAlarmEnabled,
-                    onChanged: (bool? value) {
-                      setState(() {
-                        _isAlarmEnabled = value ?? false;
-                        if (_isAlarmEnabled && _selectedTime == null) {
-                          _selectedTime = TimeOfDay.now();
-                        }
-                      });
-                      widget.onAlarmChanged(_isAlarmEnabled, _selectedTime);
-                    },
-                  ),
-                ],
+        const SizedBox(height: 12),
+        
+        // Time Display
+        InkWell(
+          onTap: _isAlarmEnabled ? _pickTime : null,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+            decoration: BoxDecoration(
+              color: _isAlarmEnabled ? Colors.white : Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: _isAlarmEnabled
+                    ? Theme.of(context).primaryColor.withOpacity(0.3)
+                    : Colors.grey.shade300,
               ),
-              Text(
-                _isAlarmEnabled && _selectedTime != null
-                    ? _selectedTime!.format(context)
-                    : '--:--',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: _isAlarmEnabled ? Colors.black : Colors.grey,
-                  fontFamily: 'Vazirmatn',
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Icon(
+                  Icons.access_time,
+                  color: _isAlarmEnabled
+                      ? Theme.of(context).primaryColor
+                      : Colors.grey,
+                  size: 20,
                 ),
-              ),
-              TextButton(
-                onPressed: _isAlarmEnabled ? _pickTime : null,
-                child: const Text('تغییر زمان'),
-              ),
-            ],
+                Text(
+                  _isAlarmEnabled && _selectedTime != null
+                      ? _selectedTime!.format(context)
+                      : '--:--',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: _isAlarmEnabled ? Colors.black87 : Colors.grey,
+                    fontFamily: 'Vazirmatn',
+                  ),
+                ),
+                SizedBox(
+                  width: 80,
+                  child: Text(
+                    _isAlarmEnabled ? 'تغییر' : 'غیرفعال',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: _isAlarmEnabled
+                          ? Theme.of(context).primaryColor
+                          : Colors.grey,
+                    ),
+                    textAlign: TextAlign.left,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],

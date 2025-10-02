@@ -17,10 +17,9 @@ class AddRoutineBottomSheet extends ConsumerStatefulWidget {
 
 class _AddRoutineBottomSheetState extends ConsumerState<AddRoutineBottomSheet> {
   final _titleController = TextEditingController();
-  List<bool> _selectedDays = List.filled(7, false);
   bool _isAlarmEnabled = false;
   TimeOfDay? _alarmTime;
-  Color _selectedColor = Colors.blue; 
+  Color _selectedColor = Colors.blue;
   int _targetRepetitions = 3;
 
   void _saveRoutine() {
@@ -35,111 +34,136 @@ class _AddRoutineBottomSheetState extends ConsumerState<AddRoutineBottomSheet> {
     final newRoutine = RoutineEntity(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: title,
-      
       createdAt: DateTime.now(),
       alarmTime: _isAlarmEnabled ? _alarmTime : null,
       color: _selectedColor,
+      targetRepetitionsPerWeek: _targetRepetitions,
     );
 
     ref.read(routineNotifierProvider.notifier).addRoutine(newRoutine);
     Navigator.of(context).pop();
   }
 
-  List<String> _convertSelectedDaysToStrings(List<bool> selected) {
-    final List<String> dayNames = [
-      'شنبه',    // 0
-      'یکشنبه',  // 1
-      'دوشنبه',  // 2
-      'سه‌شنبه', // 3
-      'چهارشنبه',// 4
-      'پنج‌شنبه',// 5
-      'جمعه'     // 6
-    ];
-    List<String> result = [];
-    for(int i = 0; i < selected.length; i++) {
-      if(selected[i]) {
-        result.add(dayNames[i]);
-      }
-    }
-    return result;
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          left: 16,
-          right: 16,
-          top: 16),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Header
-            Row(
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.75,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: Colors.grey.shade200),
+              ),
+            ),
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TextButton(
                   onPressed: _saveRoutine,
-                  child: const Text('ذخیره', style: TextStyle(fontSize: 16)),
+                  child: const Text(
+                    'ذخیره',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                 ),
                 const Text(
-                  'ساخت روتین جدید',
+                  'روتین جدید',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close),
                 ),
               ],
             ),
-            const Divider(),
-            const SizedBox(height: 16),
+          ),
 
-            // Title Input
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'عنوان روتین',
-                border: OutlineInputBorder(),
+          // Content
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Title Input
+                  _buildSectionContainer(
+                    child: TextField(
+                      controller: _titleController,
+                      decoration: const InputDecoration(
+                        labelText: 'عنوان روتین',
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                      textAlign: TextAlign.right,
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Frequency Selector
+                  _buildSectionContainer(
+                    child: FrequencySelector(
+                      initialFrequency: _targetRepetitions,
+                      onFrequencyChanged: (frequency) {
+                        setState(() {
+                          _targetRepetitions = frequency;
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Alarm Setter
+                  _buildSectionContainer(
+                    child: AlarmSetter(
+                      onAlarmChanged: (isEnabled, time) {
+                        setState(() {
+                          _isAlarmEnabled = isEnabled;
+                          _alarmTime = time;
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Color Selector
+                  _buildSectionContainer(
+                    child: ColorSelector(
+                      onColorSelected: (color) {
+                        setState(() {
+                          _selectedColor = color;
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
               ),
-              textAlign: TextAlign.right,
             ),
-            const SizedBox(height: 24),
-
-            FrequencySelector(
-  initialFrequency: 1,
-  onFrequencyChanged: (frequency) {
-    setState(() {
-      _targetRepetitions = frequency;
-    });
-  },
-),
-            const SizedBox(height: 24),
-
-            // Alarm Setter
-            AlarmSetter(
-              onAlarmChanged: (isEnabled, time) {
-                setState(() {
-                  _isAlarmEnabled = isEnabled;
-                  _alarmTime = time;
-                });
-              },
-            ),
-            const SizedBox(height: 24),
-
-            // Color Selector
-            ColorSelector(
-              onColorSelected: (color) {
-                setState(() {
-                  _selectedColor = color;
-                });
-              },
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
+
+  Widget _buildSectionContainer({required Widget child}) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: child,
+    );
+  }
+
   @override
   void dispose() {
     _titleController.dispose();
