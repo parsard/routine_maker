@@ -46,4 +46,15 @@ class RoutineRepositoryImpl implements RoutineRepository {
       return left(DatabaseFailure('Failed to get routines: ${e.toString()}'));
     }
   }
+
+ @override
+  Future<Either<Failure, void>> updateRoutineProgress(RoutineEntity routine) async {
+    try {
+      final routineCompanion = routine.toCompanion();
+      await localDataSource.updateRoutine(routineCompanion);
+      return right(unit);
+    } catch (e) {
+      return left(DatabaseFailure('Failed to update routine: ${e.toString()}'));
+    }
+  }
 }

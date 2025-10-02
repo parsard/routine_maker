@@ -5,12 +5,18 @@ abstract class RoutineLocalDataSource {
   Future<List<RoutineTbl>> getAllRoutines();
   Future<void> addRoutine(RoutineTableCompanion routineCompanion);
   Future<void> deleteRoutine(String id);
+  Future<void> updateRoutine(RoutineTableCompanion routine);
 }
 
 class RoutineLocalDataSourceImpl implements RoutineLocalDataSource {
   final AppDatabase database;
 
   RoutineLocalDataSourceImpl({required this.database});
+
+  @override
+  Future<void> updateRoutine(RoutineTableCompanion routine) async {
+    await database.update(database.routineTable).replace(routine);
+  }
 
   @override
   Future<void> addRoutine(RoutineTableCompanion routineCompanion) async {
