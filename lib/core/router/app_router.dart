@@ -24,7 +24,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/chart',
-                builder: (context, state) => const ChartScreen(), // صفحه روتین شما
+                builder: (context, state) => const ChartScreen(), 
               ),
             ],
           ),

@@ -51,8 +51,50 @@ class $RoutineTableTable extends RoutineTable
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _alarmHourMeta = const VerificationMeta(
+    'alarmHour',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, title, days, createdAt];
+  late final GeneratedColumn<int> alarmHour = GeneratedColumn<int>(
+    'alarm_hour',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _alarmMinuteMeta = const VerificationMeta(
+    'alarmMinute',
+  );
+  @override
+  late final GeneratedColumn<int> alarmMinute = GeneratedColumn<int>(
+    'alarm_minute',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _colorValueMeta = const VerificationMeta(
+    'colorValue',
+  );
+  @override
+  late final GeneratedColumn<int> colorValue = GeneratedColumn<int>(
+    'color_value',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0xFF2196F3),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    title,
+    days,
+    createdAt,
+    alarmHour,
+    alarmMinute,
+    colorValue,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -94,6 +136,27 @@ class $RoutineTableTable extends RoutineTable
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
+    if (data.containsKey('alarm_hour')) {
+      context.handle(
+        _alarmHourMeta,
+        alarmHour.isAcceptableOrUnknown(data['alarm_hour']!, _alarmHourMeta),
+      );
+    }
+    if (data.containsKey('alarm_minute')) {
+      context.handle(
+        _alarmMinuteMeta,
+        alarmMinute.isAcceptableOrUnknown(
+          data['alarm_minute']!,
+          _alarmMinuteMeta,
+        ),
+      );
+    }
+    if (data.containsKey('color_value')) {
+      context.handle(
+        _colorValueMeta,
+        colorValue.isAcceptableOrUnknown(data['color_value']!, _colorValueMeta),
+      );
+    }
     return context;
   }
 
@@ -123,6 +186,19 @@ class $RoutineTableTable extends RoutineTable
             DriftSqlType.dateTime,
             data['${effectivePrefix}created_at'],
           )!,
+      alarmHour: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}alarm_hour'],
+      ),
+      alarmMinute: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}alarm_minute'],
+      ),
+      colorValue:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}color_value'],
+          )!,
     );
   }
 
@@ -137,11 +213,17 @@ class RoutineTbl extends DataClass implements Insertable<RoutineTbl> {
   final String title;
   final String days;
   final DateTime createdAt;
+  final int? alarmHour;
+  final int? alarmMinute;
+  final int colorValue;
   const RoutineTbl({
     required this.id,
     required this.title,
     required this.days,
     required this.createdAt,
+    this.alarmHour,
+    this.alarmMinute,
+    required this.colorValue,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -150,6 +232,13 @@ class RoutineTbl extends DataClass implements Insertable<RoutineTbl> {
     map['title'] = Variable<String>(title);
     map['days'] = Variable<String>(days);
     map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || alarmHour != null) {
+      map['alarm_hour'] = Variable<int>(alarmHour);
+    }
+    if (!nullToAbsent || alarmMinute != null) {
+      map['alarm_minute'] = Variable<int>(alarmMinute);
+    }
+    map['color_value'] = Variable<int>(colorValue);
     return map;
   }
 
@@ -159,6 +248,15 @@ class RoutineTbl extends DataClass implements Insertable<RoutineTbl> {
       title: Value(title),
       days: Value(days),
       createdAt: Value(createdAt),
+      alarmHour:
+          alarmHour == null && nullToAbsent
+              ? const Value.absent()
+              : Value(alarmHour),
+      alarmMinute:
+          alarmMinute == null && nullToAbsent
+              ? const Value.absent()
+              : Value(alarmMinute),
+      colorValue: Value(colorValue),
     );
   }
 
@@ -172,6 +270,9 @@ class RoutineTbl extends DataClass implements Insertable<RoutineTbl> {
       title: serializer.fromJson<String>(json['title']),
       days: serializer.fromJson<String>(json['days']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      alarmHour: serializer.fromJson<int?>(json['alarmHour']),
+      alarmMinute: serializer.fromJson<int?>(json['alarmMinute']),
+      colorValue: serializer.fromJson<int>(json['colorValue']),
     );
   }
   @override
@@ -182,6 +283,9 @@ class RoutineTbl extends DataClass implements Insertable<RoutineTbl> {
       'title': serializer.toJson<String>(title),
       'days': serializer.toJson<String>(days),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'alarmHour': serializer.toJson<int?>(alarmHour),
+      'alarmMinute': serializer.toJson<int?>(alarmMinute),
+      'colorValue': serializer.toJson<int>(colorValue),
     };
   }
 
@@ -190,11 +294,17 @@ class RoutineTbl extends DataClass implements Insertable<RoutineTbl> {
     String? title,
     String? days,
     DateTime? createdAt,
+    Value<int?> alarmHour = const Value.absent(),
+    Value<int?> alarmMinute = const Value.absent(),
+    int? colorValue,
   }) => RoutineTbl(
     id: id ?? this.id,
     title: title ?? this.title,
     days: days ?? this.days,
     createdAt: createdAt ?? this.createdAt,
+    alarmHour: alarmHour.present ? alarmHour.value : this.alarmHour,
+    alarmMinute: alarmMinute.present ? alarmMinute.value : this.alarmMinute,
+    colorValue: colorValue ?? this.colorValue,
   );
   RoutineTbl copyWithCompanion(RoutineTableCompanion data) {
     return RoutineTbl(
@@ -202,6 +312,11 @@ class RoutineTbl extends DataClass implements Insertable<RoutineTbl> {
       title: data.title.present ? data.title.value : this.title,
       days: data.days.present ? data.days.value : this.days,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      alarmHour: data.alarmHour.present ? data.alarmHour.value : this.alarmHour,
+      alarmMinute:
+          data.alarmMinute.present ? data.alarmMinute.value : this.alarmMinute,
+      colorValue:
+          data.colorValue.present ? data.colorValue.value : this.colorValue,
     );
   }
 
@@ -211,13 +326,24 @@ class RoutineTbl extends DataClass implements Insertable<RoutineTbl> {
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('days: $days, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('alarmHour: $alarmHour, ')
+          ..write('alarmMinute: $alarmMinute, ')
+          ..write('colorValue: $colorValue')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, title, days, createdAt);
+  int get hashCode => Object.hash(
+    id,
+    title,
+    days,
+    createdAt,
+    alarmHour,
+    alarmMinute,
+    colorValue,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -225,7 +351,10 @@ class RoutineTbl extends DataClass implements Insertable<RoutineTbl> {
           other.id == this.id &&
           other.title == this.title &&
           other.days == this.days &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.alarmHour == this.alarmHour &&
+          other.alarmMinute == this.alarmMinute &&
+          other.colorValue == this.colorValue);
 }
 
 class RoutineTableCompanion extends UpdateCompanion<RoutineTbl> {
@@ -233,12 +362,18 @@ class RoutineTableCompanion extends UpdateCompanion<RoutineTbl> {
   final Value<String> title;
   final Value<String> days;
   final Value<DateTime> createdAt;
+  final Value<int?> alarmHour;
+  final Value<int?> alarmMinute;
+  final Value<int> colorValue;
   final Value<int> rowid;
   const RoutineTableCompanion({
     this.id = const Value.absent(),
     this.title = const Value.absent(),
     this.days = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.alarmHour = const Value.absent(),
+    this.alarmMinute = const Value.absent(),
+    this.colorValue = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   RoutineTableCompanion.insert({
@@ -246,6 +381,9 @@ class RoutineTableCompanion extends UpdateCompanion<RoutineTbl> {
     required String title,
     required String days,
     required DateTime createdAt,
+    this.alarmHour = const Value.absent(),
+    this.alarmMinute = const Value.absent(),
+    this.colorValue = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        title = Value(title),
@@ -256,6 +394,9 @@ class RoutineTableCompanion extends UpdateCompanion<RoutineTbl> {
     Expression<String>? title,
     Expression<String>? days,
     Expression<DateTime>? createdAt,
+    Expression<int>? alarmHour,
+    Expression<int>? alarmMinute,
+    Expression<int>? colorValue,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -263,6 +404,9 @@ class RoutineTableCompanion extends UpdateCompanion<RoutineTbl> {
       if (title != null) 'title': title,
       if (days != null) 'days': days,
       if (createdAt != null) 'created_at': createdAt,
+      if (alarmHour != null) 'alarm_hour': alarmHour,
+      if (alarmMinute != null) 'alarm_minute': alarmMinute,
+      if (colorValue != null) 'color_value': colorValue,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -272,6 +416,9 @@ class RoutineTableCompanion extends UpdateCompanion<RoutineTbl> {
     Value<String>? title,
     Value<String>? days,
     Value<DateTime>? createdAt,
+    Value<int?>? alarmHour,
+    Value<int?>? alarmMinute,
+    Value<int>? colorValue,
     Value<int>? rowid,
   }) {
     return RoutineTableCompanion(
@@ -279,6 +426,9 @@ class RoutineTableCompanion extends UpdateCompanion<RoutineTbl> {
       title: title ?? this.title,
       days: days ?? this.days,
       createdAt: createdAt ?? this.createdAt,
+      alarmHour: alarmHour ?? this.alarmHour,
+      alarmMinute: alarmMinute ?? this.alarmMinute,
+      colorValue: colorValue ?? this.colorValue,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -298,6 +448,15 @@ class RoutineTableCompanion extends UpdateCompanion<RoutineTbl> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (alarmHour.present) {
+      map['alarm_hour'] = Variable<int>(alarmHour.value);
+    }
+    if (alarmMinute.present) {
+      map['alarm_minute'] = Variable<int>(alarmMinute.value);
+    }
+    if (colorValue.present) {
+      map['color_value'] = Variable<int>(colorValue.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -311,6 +470,9 @@ class RoutineTableCompanion extends UpdateCompanion<RoutineTbl> {
           ..write('title: $title, ')
           ..write('days: $days, ')
           ..write('createdAt: $createdAt, ')
+          ..write('alarmHour: $alarmHour, ')
+          ..write('alarmMinute: $alarmMinute, ')
+          ..write('colorValue: $colorValue, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -334,6 +496,9 @@ typedef $$RoutineTableTableCreateCompanionBuilder =
       required String title,
       required String days,
       required DateTime createdAt,
+      Value<int?> alarmHour,
+      Value<int?> alarmMinute,
+      Value<int> colorValue,
       Value<int> rowid,
     });
 typedef $$RoutineTableTableUpdateCompanionBuilder =
@@ -342,6 +507,9 @@ typedef $$RoutineTableTableUpdateCompanionBuilder =
       Value<String> title,
       Value<String> days,
       Value<DateTime> createdAt,
+      Value<int?> alarmHour,
+      Value<int?> alarmMinute,
+      Value<int> colorValue,
       Value<int> rowid,
     });
 
@@ -371,6 +539,21 @@ class $$RoutineTableTableFilterComposer
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get alarmHour => $composableBuilder(
+    column: $table.alarmHour,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get alarmMinute => $composableBuilder(
+    column: $table.alarmMinute,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get colorValue => $composableBuilder(
+    column: $table.colorValue,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -403,6 +586,21 @@ class $$RoutineTableTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get alarmHour => $composableBuilder(
+    column: $table.alarmHour,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get alarmMinute => $composableBuilder(
+    column: $table.alarmMinute,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get colorValue => $composableBuilder(
+    column: $table.colorValue,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$RoutineTableTableAnnotationComposer
@@ -425,6 +623,19 @@ class $$RoutineTableTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get alarmHour =>
+      $composableBuilder(column: $table.alarmHour, builder: (column) => column);
+
+  GeneratedColumn<int> get alarmMinute => $composableBuilder(
+    column: $table.alarmMinute,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get colorValue => $composableBuilder(
+    column: $table.colorValue,
+    builder: (column) => column,
+  );
 }
 
 class $$RoutineTableTableTableManager
@@ -463,12 +674,18 @@ class $$RoutineTableTableTableManager
                 Value<String> title = const Value.absent(),
                 Value<String> days = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<int?> alarmHour = const Value.absent(),
+                Value<int?> alarmMinute = const Value.absent(),
+                Value<int> colorValue = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => RoutineTableCompanion(
                 id: id,
                 title: title,
                 days: days,
                 createdAt: createdAt,
+                alarmHour: alarmHour,
+                alarmMinute: alarmMinute,
+                colorValue: colorValue,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -477,12 +694,18 @@ class $$RoutineTableTableTableManager
                 required String title,
                 required String days,
                 required DateTime createdAt,
+                Value<int?> alarmHour = const Value.absent(),
+                Value<int?> alarmMinute = const Value.absent(),
+                Value<int> colorValue = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => RoutineTableCompanion.insert(
                 id: id,
                 title: title,
                 days: days,
                 createdAt: createdAt,
+                alarmHour: alarmHour,
+                alarmMinute: alarmMinute,
+                colorValue: colorValue,
                 rowid: rowid,
               ),
           withReferenceMapper:

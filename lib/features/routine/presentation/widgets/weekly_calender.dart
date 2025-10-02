@@ -1,7 +1,5 @@
-// lib/features/routine/presentation/widgets/weekly_calendar.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:routine_maker/features/routine/presentation/notifiers/calender_notifier.dart';
 
 class WeeklyCalendar extends ConsumerWidget {
@@ -21,30 +19,25 @@ class WeeklyCalendar extends ConsumerWidget {
         ? calendarNotifier.goToPreviousWeek
         : calendarNotifier.goToCurrentWeek;
 
-    // A fixed width for each day column to ensure alignment with RoutineListItem
-    // این عرض ثابت باعث تراز شدن عمودی ستون‌ها می‌شود
     const double dayColumnWidth = 40.0;
 
     return Padding(
-      // We match this padding with RoutineListItem's container for perfect alignment
-      // این Padding با کانتینر آیتم روتین هماهنگ است
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
       child: Row(
         children: [
-          // The button will take up the remaining space
-          // دکمه فضای باقی‌مانده را اشغال می‌کند
           Expanded(
             child: Align(
-              alignment: Alignment.centerRight, // Align button to the right
+              alignment: Alignment.centerRight,
               child: TextButton(
                 onPressed: buttonAction,
                 style: TextButton.styleFrom(
                   backgroundColor: Colors.green,
-                  foregroundColor: Colors.white, // Text color should be white on green
+                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20.0), // Rounded button
+                    borderRadius: BorderRadius.circular(20.0),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
                 ),
                 child: Text(
                   buttonText,
@@ -53,54 +46,73 @@ class WeeklyCalendar extends ConsumerWidget {
               ),
             ),
           ),
-          // A fixed space between the button and the calendar dates
-          // یک فاصله ثابت بین دکمه و تقویم
           const SizedBox(width: 16.0),
-          // Row for the 7 days of the week
-          // ردیف برای ۷ روز هفته
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: List.generate(7, (index) {
               final date = weekDates[index];
               final bool isToday = calendarNotifier.isToday(date);
+              final bool isSelected = calendarNotifier.isSelectedDate(date); 
+              Color backgroundColor;
+              Color textColor;
+              Border? border;
 
-              final Color backgroundColor =
-                  isToday ? Theme.of(context).primaryColor : Colors.transparent;
-              final Color textColor = isToday ? Colors.white : Colors.black;
+              if (isSelected) {
+                backgroundColor = Theme.of(context).primaryColor;
+                textColor = Colors.white;
+                border = null;
+              } else if (isToday) {
+                backgroundColor = Colors.transparent;
+                textColor = Theme.of(context).primaryColor;
+                border = Border.all(
+                  color: Theme.of(context).primaryColor,
+                  width: 2,
+                );
+              } else {
+                // روزهای معمولی
+                backgroundColor = Colors.transparent;
+                textColor = Colors.black;
+                border = null;
+              }
 
-              // Each day is wrapped in a SizedBox with a fixed width
-              // هر روز در یک SizedBox با عرض ثابت قرار می‌گیرد
               return SizedBox(
                 width: dayColumnWidth,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      weekDays[index],
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      width: 36,
-                      height: 36,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: backgroundColor,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text(
-                        '${date.day}',
-                        style: TextStyle(
-                          color: textColor,
-                          fontWeight:
-                              isToday ? FontWeight.bold : FontWeight.normal,
+                child: GestureDetector( 
+                  onTap: () {
+                    calendarNotifier.selectDate(date); 
+                  },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        weekDays[index],
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 8),
+                      Container(
+                        width: 36,
+                        height: 36,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: backgroundColor,
+                          shape: BoxShape.circle,
+                          border: border, 
+                        ),
+                        child: Text(
+                          '${date.day}',
+                          style: TextStyle(
+                            color: textColor,
+                            fontWeight: isSelected || isToday
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             }),

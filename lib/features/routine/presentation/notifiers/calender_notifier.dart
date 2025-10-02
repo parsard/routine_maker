@@ -23,10 +23,9 @@ class CalendarNotifier extends StateNotifier<CalendarState> {
     final todayWeekStart = _findFirstDayOfWeek(state.today);
     state = state.copyWith(
       currentDisplayDate: todayWeekStart,
+      selectedDate: state.today, 
     );
   }
-
-  
 
   List<Jalali> getWeekDays() {
     final firstDayOfWeek = _findFirstDayOfWeek(state.currentDisplayDate);
@@ -43,6 +42,27 @@ class CalendarNotifier extends StateNotifier<CalendarState> {
     final currentWeekStart = _findFirstDayOfWeek(state.currentDisplayDate);
     final todayWeekStart = _findFirstDayOfWeek(state.today);
     return currentWeekStart.julianDayNumber == todayWeekStart.julianDayNumber;
+  }
+
+  // ⬅️ متدهای جدید برای انتخاب روز
+  void selectDate(Jalali date) {
+    state = state.copyWith(selectedDate: date);
+  }
+
+  bool isSelectedDate(Jalali date) {
+    return date.year == state.selectedDate.year &&
+           date.month == state.selectedDate.month &&
+           date.day == state.selectedDate.day;
+  }
+
+  Jalali getSelectedDate() {
+    return state.selectedDate;
+  }
+
+  String getSelectedDayName() {
+    final persianDays = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه'];
+    final weekDay = state.selectedDate.weekDay;
+    return persianDays[weekDay == 7 ? 0 : weekDay];
   }
 }
 
